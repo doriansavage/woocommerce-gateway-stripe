@@ -463,8 +463,15 @@ if ( ! class_exists( 'WC_Stripe' ) ) :
 				$captured = get_post_meta( $order_id, '_stripe_charge_captured', true );
 
 				if ( $charge && 'no' === $captured ) {
+					$refund_amount = $order->get_total_refunded();
+					if($refund_amount > 0){
+						$order_total = ($order->get_total() * 100)-($refund_amount * 100);
+					} else {
+						$order_total = $order->get_total() * 100;
+					}
+
 					$result = WC_Stripe_API::request( array(
-						'amount'   => $order->get_total() * 100,
+						'amount'   => $order_total,
 						'expand[]' => 'balance_transaction',
 					), 'charges/' . $charge . '/capture' );
 
